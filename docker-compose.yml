@@ -1,0 +1,37 @@
+# fm-web — optional single-site deployment stack.
+#
+# Phase 0 placeholder. The Dockerfile this references is added in phase 7
+# (V1 hardening). For dev, prefer the host workflow:
+#   make install
+#   make dev             # FastAPI on :8000
+#   make frontend-dev    # Vite on :5173 (proxies /api to :8000)
+#
+# Assumes a reachable VistA broker. The VEHU dev broker lives in the
+# vehu-docker-dev repo — start it there before running integration tests
+# or pointing fm-web at a live site.
+
+services:
+  fm-web:
+    build:
+      context: .
+      dockerfile: Dockerfile  # added in phase 7
+    image: fm-web:dev
+    container_name: fm-web
+    ports:
+      - "8080:8080"
+    environment:
+      FM_WEB_SESSION_SECRET: ${FM_WEB_SESSION_SECRET:-dev-only-change-me}
+      FM_WEB_SITES_FILE: /etc/fm-web/sites.yaml
+      FM_WEB_FRONTMATTER_DB: /data/frontmatter.db  # phase-2 doc links
+      FM_WEB_LOG_LEVEL: INFO
+    volumes:
+      # Per-site VistA config (host, port, UCI, app context)
+      - ./sites.yaml:/etc/fm-web/sites.yaml:ro
+      # Read-only copy of frontmatter.db from ~/data/vista-docs/state/
+      - ~/data/vista-docs/state/frontmatter.db:/data/frontmatter.db:ro
+      # Server logs
+      - ~/data/fm-web/logs:/var/log/fm-web
+    restart: unless-stopped
+    # To reach a VEHU broker running on the Docker host:
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"

@@ -15,3 +15,11 @@ build/
 *.sqlite
 .coverage
 htmlcov/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Per-site VistA config (committed as sites.yaml.example only)
+sites.yaml

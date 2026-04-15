@@ -1,0 +1,27 @@
+# fm-web per-site VistA configuration.
+#
+# Copy to sites.yaml and edit. Each entry describes one VistA instance
+# fm-web can connect to via the XWB broker. No secrets here — ACCESS and
+# VERIFY codes are entered per-session at sign-on.
+
+sites:
+
+  - id: vehu
+    label: VEHU (local dev)
+    host: localhost
+    port: 9430
+    uci: VAH
+    app_context: FM BROWSER
+    description: >
+      YottaDB/Octo dev image shipped by YottaDB Inc. Demo credentials:
+      ACCESS=fakedoc1  VERIFY=1Doc!@#$  (do not use in production).
+    timeout_ms: 5000
+
+  # Example production-site entry (commented out). Add one block per site.
+  # - id: site-688
+  #   label: Washington DC VAMC (688)
+  #   host: vista-688.internal
+  #   port: 9430
+  #   uci: VAH
+  #   app_context: FM BROWSER
+  #   timeout_ms: 10000
