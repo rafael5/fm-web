@@ -390,6 +390,62 @@ RPC that already does it.
 
 ---
 
+## Category I — Discovered during fm-web phase 1 (2026-04-15)
+
+### L31. `DDR GET DD` / `DDR GET DD HASH` are NOT universal
+
+**Finding:** The VEHU broker (yottadb/octo-vehu, FileMan as of 2026-04-15)
+returns `"Remote Procedure 'DDR GET DD' doesn't exist on the server."` —
+same for `DDR GET DD HASH`. These RPCs were planned as the backbone of DD
+browsing; they do not ship with every VistA FileMan build. Fixtures
+`tests/contract/fixtures/ddr_get_dd__patient_AL.json` and
+`ddr_get_dd_hash__patient.json` record the exact rejection shape.
+
+**Why it matters:** ARCHITECTURE.md §4.1 put both on the allow-list and
+§5 showed them as "detect DD drift between sites" and "pull the data
+dictionary for one file." Without them the architecture does not degrade
+gracefully — DD browsing needs a different primitive.
+
+**fm-web takeaway:** Removed from the allow-list (iteration 2026-04-15).
+DD browsing is re-implemented on top of `DDR LISTER` + `DDR GETS ENTRY
+DATA` run against **file #1 (FILE)** and its FIELD subfile. This is more
+portable — `LIST^DIC` and `GETS^DIQ` are core FileMan, available on every
+VistA. DD-drift detection becomes a fingerprint over the LISTER response
+(hash of sorted `ien^label` lines) instead of the server-computed hash.
+ARCHITECTURE.md §5 needs a phase-2 revision; this file is the authority
+until then.
+
+### L32. VEHU session state drifts — demo credentials can silently break
+
+**Finding:** The documented VEHU demo credentials `fakedoc1 / 1Doc!@#$`
+fail against the currently running `yottadb/octo-vehu` image. An
+independent probe (`ZWR ^VA(200, IEN, 0)` for the first 10 IENs) showed
+no user named `fakedoc1` — the image ships the POSTMASTER / PROGRAMMER
+family of default accounts instead.
+
+**Why it matters:** Every contract test that requires authentication
+depends on valid credentials. If they silently rotate, every DDR*-
+requiring fixture records `"Application context has not been created!"`
+instead of real data — testing the error path, not the happy path.
+
+**fm-web takeaway:**
+- Credentials live in per-site `sites.yaml`; never hardcode in tests.
+  Recording script accepts `--access` / `--verify` flags + env vars.
+- Contract tests assert the *shape* of responses (happy or error),
+  not specific content values — a test relying on happy-path skips
+  gracefully if the fixture captured an error.
+- Add a scripted idempotent dev-user setup (e.g. `scripts/setup_vehu_user.m`)
+  that creates a known account on first run. Deferred to phase 1.1
+  follow-up — must land before contract tests can cover DDR* happy paths.
+
+**Diagnostic evidence in fixtures:**
+- `xus_av_code__response.json` → `0\r\n0\r\n0\r\nNot a valid ACCESS
+  CODE/VERIFY CODE pair.\r\n...`
+- `xus_signon_setup__default.json` (pre-auth; works) → real VEHU site
+  metadata including UCI `VAH` and hostname.
+
+---
+
 ## Open questions carried forward
 
 | ID | Question | Relevance to fm-web |

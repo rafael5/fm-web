@@ -81,16 +81,15 @@ ALLOWED_RPCS: tuple[AllowedRpc, ...] = (
         "GETS^DIQ",
         "Fetch field values by IEN in external or internal format.",
     ),
-    AllowedRpc(
-        "DDR GET DD HASH",
-        "(FileMan internal)",
-        "Cheap DD fingerprint for drift detection across sites.",
-    ),
-    AllowedRpc(
-        "DDR GET DD",
-        "$$GET1^DID / $$GET1^DIQ",
-        "File and field attribute retrieval — the DD browsing backbone.",
-    ),
+    # NOTE: DDR GET DD and DDR GET DD HASH were initially included but
+    # empirically DO NOT EXIST on the VEHU (yottadb/octo-vehu) broker —
+    # the server replies "Remote Procedure 'DDR GET DD' doesn't exist on
+    # the server." They are not universal across VistA distributions. DD
+    # browsing is instead implemented via DDR LISTER + DDR GETS ENTRY
+    # DATA against file #1 (the FILE registry) and its FIELD subfile.
+    # See tests/contract/fixtures/ddr_get_dd__patient_AL.json for the
+    # rejection response shape, and LESSONS-LEARNED L31. Do not re-add
+    # without verifying availability on each target site.
     AllowedRpc(
         "ORWU DT",
         "$$DT^DICRW",

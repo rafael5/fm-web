@@ -1,0 +1,18 @@
+{
+  "rpc_name": "DDR LISTER",
+  "variant": "new_person_first5",
+  "params": [
+    "200",
+    "",
+    "P",
+    "5",
+    "",
+    "0",
+    "",
+    "B",
+    "",
+    ""
+  ],
+  "raw_response": ")Application context has not been created!\u0000",
+  "recorded_at": "2026-04-15T23:39:10.903146+00:00"
+}

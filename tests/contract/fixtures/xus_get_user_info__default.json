@@ -1,0 +1,7 @@
+{
+  "rpc_name": "XUS GET USER INFO",
+  "variant": "default",
+  "params": [],
+  "raw_response": "\u0016User not fully sign-on\u00000\r\nunk\r\nunk\r\nunk\r\nunk\r\nunk\r\nunk\r\n",
+  "recorded_at": "2026-04-15T23:39:06.900064+00:00"
+}

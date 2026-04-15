@@ -1,0 +1,16 @@
+{
+  "rpc_name": "DDR FINDER",
+  "variant": "patient_by_a_prefix",
+  "params": [
+    "2",
+    "B",
+    "",
+    "1",
+    "A",
+    "5",
+    "",
+    ""
+  ],
+  "raw_response": ")Application context has not been created!\u0000",
+  "recorded_at": "2026-04-15T23:39:16.908000+00:00"
+}

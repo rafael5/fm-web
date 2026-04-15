@@ -1,0 +1,18 @@
+{
+  "rpc_name": "DDR LISTER",
+  "variant": "patient_first5",
+  "params": [
+    "2",
+    "",
+    "P",
+    "5",
+    "",
+    "0",
+    "",
+    "B",
+    "",
+    ""
+  ],
+  "raw_response": ")Application context has not been created!\u0000",
+  "recorded_at": "2026-04-15T23:39:08.901199+00:00"
+}

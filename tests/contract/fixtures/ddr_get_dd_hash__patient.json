@@ -1,0 +1,9 @@
+{
+  "rpc_name": "DDR GET DD HASH",
+  "variant": "patient",
+  "params": [
+    "2"
+  ],
+  "raw_response": "?Remote Procedure 'DDR GET DD HASH' doesn't exist on the server.\u0000",
+  "recorded_at": "2026-04-15T23:39:20.910842+00:00"
+}

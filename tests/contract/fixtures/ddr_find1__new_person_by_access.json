@@ -1,0 +1,12 @@
+{
+  "rpc_name": "DDR FIND1",
+  "variant": "new_person_by_access",
+  "params": [
+    "200",
+    "fakedoc1",
+    "A",
+    ""
+  ],
+  "raw_response": ")Application context has not been created!\u0000",
+  "recorded_at": "2026-04-15T23:39:14.906621+00:00"
+}

@@ -1,0 +1,28 @@
+{
+  "rpc_name": "DDR GETS ENTRY DATA",
+  "variant": "patient_1_basic",
+  "params": [
+    {
+      "_dict": [
+        [
+          "FIELDS",
+          ".01;.02;.03;.09"
+        ],
+        [
+          "FILE",
+          "2"
+        ],
+        [
+          "FLAGS",
+          "E"
+        ],
+        [
+          "IENS",
+          "1,"
+        ]
+      ]
+    }
+  ],
+  "raw_response": ")Application context has not been created!\u0000",
+  "recorded_at": "2026-04-15T23:39:12.905020+00:00"
+}

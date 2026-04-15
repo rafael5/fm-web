@@ -1,0 +1,9 @@
+{
+  "rpc_name": "XUS AV CODE",
+  "variant": "response",
+  "params": [
+    "<redacted ciphertext>"
+  ],
+  "raw_response": "0\r\n0\r\n0\r\nNot a valid ACCESS CODE/VERIFY CODE pair.\r\n0\r\n0\r\n",
+  "recorded_at": "2026-04-15T23:39:04.897580+00:00"
+}

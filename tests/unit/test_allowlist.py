@@ -71,3 +71,8 @@ class TestAllowListCoverage:
         for a in ALLOWED_RPCS:
             assert a.purpose, f"{a.name} has no purpose string"
             assert a.wraps, f"{a.name} has no wraps string"
+
+    def test_ddr_get_dd_is_not_listed(self):
+        # Empirically absent from VEHU — see LESSONS-LEARNED L31.
+        assert not is_allowed("DDR GET DD")
+        assert not is_allowed("DDR GET DD HASH")
