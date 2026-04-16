@@ -444,10 +444,10 @@ Each phase is a merge-to-main milestone with a runnable product.
 
 | Phase | Scope | Exit criteria |
 |-------|-------|---------------|
-| **0. Repo bootstrap** | `fm-web/` repo init, Python pyproject + Makefile, Vite frontend skeleton, CI skeleton, docs moved in | `make install && make test` green (one placeholder test); empty React shell loads at `:5173` |
-| **1. Broker foundation** | Port `rpc_broker.py` → `fm_web.broker.wire` + `client`. Allow-list. `FakeRPCBroker` with recorded fixtures. Unit + contract tests. | `VistARpcBroker.signon(site, access, verify)` works against VEHU; 100% of allow-listed RPCs covered by contract tests |
-| **2. Services + API** | `DataDictionaryService`, `EntryService`, `PackageService`; FastAPI routes; session management; OpenAPI schema export | `curl /api/files/2` returns PATIENT metadata; `curl /api/files/2/entries` paginates |
-| **3. React skeleton + auth** | Sign-on screen, session state, diagnostics page, RPC call log panel | End-to-end sign-on against VEHU; logout works; session expiry observed |
+| **0. Repo bootstrap** | Scaffold, deps, Vite frontend | **DONE** (e38d64c) |
+| **1. Broker foundation** | XWB wire codec, allow-list, FakeRPCBroker, VEHU fixtures | **DONE** (1314986 + eb437fa + 71612c4). L31-L35 discovered. |
+| **2. Services + API** | DataDictionaryService, EntryService, PackageService; 17 FastAPI routes; session middleware | **DONE** (a2fd616). 174 tests. |
+| **3. React skeleton + auth** | Sign-on form, auth gate, file list, diagnostics, Tailwind, TanStack Query, openapi-typescript | **DONE** (b7403fa + f3cffeb). E2E verified against VEHU. L35 resolved (DDR dict params). |
 | **4. File browser** | File list page with search + sort; file detail page with fields table + cross-refs | Browser shows all 2,915 files; click through to fields for PATIENT, NEW PERSON, INSTITUTION |
 | **5. Entry browser** | Entry list per file with column picker; entry detail drawer | Paginate EXPRESSIONS (2.58M rows) smoothly; external form for dates / pointers / set-of-codes |
 | **6. Packages** | Package list + files-by-package view | File 9.4 enumerated; drill-down works |
