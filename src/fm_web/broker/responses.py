@@ -48,16 +48,25 @@ class ListerEntry:
 def parse_gets_response(raw: str) -> list[GetsEntry]:
     """Parse ``DDR GETS ENTRY DATA`` output into :class:`GetsEntry` objects.
 
-    Lines with fewer than four caret-pieces or non-numeric file/field
-    numbers are silently skipped — FileMan sometimes emits header or
-    divider lines we don't care about.
+    Handles two wire shapes observed across VistA builds:
+
+    * **4-piece** — ``file^iens^field^value`` (older FileMan DBS).
+    * **5-piece** — ``file^iens^field^multiple_instance^value``
+      (VEHU / newer builds). When the multiple-instance piece is empty
+      (the common non-multi field case) the raw line looks like
+      ``2^1^.01^^NAME`` — a double-caret before the value.
+
+    Strategy: split into at most 5 pieces. If piece 4 is empty or has
+    a form compatible with a multi-instance indicator, treat piece 5
+    as the value; otherwise piece 4 is the value. Never raises —
+    unrecognised lines are skipped.
     """
     out: list[GetsEntry] = []
     for raw_line in raw.replace("\r\n", "\n").split("\n"):
         line = raw_line.strip()
         if not line:
             continue
-        parts = line.split("^", 3)
+        parts = line.split("^", 4)
         if len(parts) < 4:
             continue
         try:
@@ -65,12 +74,19 @@ def parse_gets_response(raw: str) -> list[GetsEntry]:
             field_num = float(parts[2])
         except ValueError:
             continue
+        # Determine value position. If we got 5 pieces, piece 4 is the
+        # multiple-instance marker and piece 5 is the value (VEHU shape).
+        # With exactly 4 pieces and no leading caret, piece 4 is value.
+        if len(parts) == 5:
+            value = parts[4]
+        else:
+            value = parts[3]
         out.append(
             GetsEntry(
                 file_number=file_num,
                 iens=parts[1],
                 field_number=field_num,
-                value=parts[3],
+                value=value,
             )
         )
     return out

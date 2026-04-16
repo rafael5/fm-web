@@ -122,7 +122,12 @@ class FakeRPCBroker:
 
     # ---------------- high-level helpers (parallel to real client) ----
 
-    def signon(self, access_code: str, verify_code: str) -> str:
+    def signon(
+        self,
+        access_code: str,
+        verify_code: str,
+        app_context: str | None = None,  # parity with VistARpcBroker
+    ) -> str:
         self.call("XUS SIGNON SETUP")
         # Enforce allow-list on AV CODE even though we don't hit the wire.
         require_allowed("XUS AV CODE")
@@ -237,17 +242,30 @@ class FakeRPCBroker:
 # ---------------------------------------------------------------------
 
 
-def _make_key(rpc_name: str, params: Iterable[str | dict[str, str]]) -> ResponseKey:
-    """Build a lookup key that distinguishes DDR list-param calls.
+def _make_key(
+    rpc_name: str, params: Iterable[str | dict[str, str]]
+) -> ResponseKey | tuple[str, tuple[str, ...]]:
+    """Build a lookup key that distinguishes calls with different params.
 
-    For RPCs called with a dict param (the list-type array pattern),
-    the key is ``(rpc_name, tuple of sorted items)``. For simple
-    literal params the key is just the RPC name.
+    Three shapes:
+
+    * **Dict param** (DDR list-type arrays) → ``(rpc_name, sorted
+      tuple of items)``.
+    * **All literal params** → ``(rpc_name, tuple of args)``.
+    * **No params** → just ``rpc_name``.
+
+    Tests can register a response under any of these shapes and the
+    fake will match. When a call produces a tuple key and no direct
+    match exists, the fake falls back to the plain ``rpc_name`` key
+    (see :meth:`FakeRPCBroker.call`).
     """
-    for p in params:
+    params_tuple = tuple(params)
+    for p in params_tuple:
         if isinstance(p, dict):
             return (rpc_name, tuple(sorted(p.items())))
-    return rpc_name
+    if not params_tuple:
+        return rpc_name
+    return (rpc_name, params_tuple)
 
 
 def _fmt_file_num(n: int | float) -> str:

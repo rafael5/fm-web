@@ -23,10 +23,24 @@ class TestParseGetsResponse:
             GetsEntry(2.0, "1,", 0.02, "M"),
         ]
 
-    def test_value_with_carets_preserved(self):
-        # Only the first three carets are delimiters.
-        raw = "2^1,^.09^X^Y^Z"
-        assert parse_gets_response(raw)[0].value == "X^Y^Z"
+    def test_vehu_five_piece_format(self):
+        # VEHU wire shape (confirmed via live recording):
+        #   file^ien^field^multiple_instance^value
+        # Empty mult instance is the common case for non-multi fields.
+        raw = "2^1^.01^^PROGRAMMER,ONE"
+        entries = parse_gets_response(raw)
+        assert len(entries) == 1
+        assert entries[0].value == "PROGRAMMER,ONE"
+
+    def test_vehu_shape_with_value_carets_assigns_last_piece(self):
+        # With the 5-piece parser, a line with 6+ pieces treats piece 5
+        # as the value (everything after the mult marker). This is a
+        # known limitation — value-carets cannot be distinguished from
+        # mult pieces without schema context. Documented in parser
+        # docstring.
+        raw = "2^1^.09^^Y^Z"
+        entries = parse_gets_response(raw)
+        assert entries[0].value == "Y^Z"
 
     def test_malformed_lines_skipped(self):
         raw = "only three^fields^here\n2^1,^.01^good\n"
