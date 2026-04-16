@@ -448,8 +448,8 @@ Each phase is a merge-to-main milestone with a runnable product.
 | **1. Broker foundation** | XWB wire codec, allow-list, FakeRPCBroker, VEHU fixtures | **DONE** (1314986 + eb437fa + 71612c4). L31-L35 discovered. |
 | **2. Services + API** | DataDictionaryService, EntryService, PackageService; 17 FastAPI routes; session middleware | **DONE** (a2fd616). 174 tests. |
 | **3. React skeleton + auth** | Sign-on form, auth gate, file list, diagnostics, Tailwind, TanStack Query, openapi-typescript | **DONE** (b7403fa + f3cffeb). E2E verified against VEHU. L35 resolved (DDR dict params). |
-| **4. File browser** | File list page with search + sort; file detail page with fields table + cross-refs | Browser shows all 2,915 files; click through to fields for PATIENT, NEW PERSON, INSTITUTION |
-| **5. Entry browser** | Entry list per file with column picker; entry detail drawer | Paginate EXPRESSIONS (2.58M rows) smoothly; external form for dates / pointers / set-of-codes |
+| **4. File browser** | Searchable file list + file detail (fields table, type badges, pointer links) + field detail | **DONE** (f844865). Search, sort, click-through navigation. |
+| **5. Entry browser** | Cursor-paginated entry list + entry detail with all fields (external form) | **DONE** (f844865). 50-per-page pagination, First/Next controls. |
 | **6. Packages** | Package list + files-by-package view | File 9.4 enumerated; drill-down works |
 | **7. V1 hardening** | Error surfacing for FileMan errors (`^TMP("DIERR")`), timeouts, reconnect, audit log | All error paths have UI treatment; 24h soak test passes |
 | **8. Docs linking (phase 2)** | `DocLinkService`, `/api/docs/for-file/{n}`, UI "Documentation" panels; best-effort field-level links | File detail for PATIENT shows 505 related VDL docs with links |
