@@ -1,0 +1,1202 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "fm-web",
+    "description": "Read-only React/FastAPI browser for VistA FileMan data dictionary and contents, via ship-with-VistA DDR* RPCs.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/session/signon": {
+      "post": {
+        "tags": [
+          "session"
+        ],
+        "summary": "Signon",
+        "operationId": "signon_api_session_signon_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/session/me": {
+      "get": {
+        "tags": [
+          "session"
+        ],
+        "summary": "Me",
+        "operationId": "me_api_session_me_get",
+        "parameters": [
+          {
+            "name": "fm_web_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fm Web Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/session/signoff": {
+      "post": {
+        "tags": [
+          "session"
+        ],
+        "summary": "Signoff",
+        "operationId": "signoff_api_session_signoff_post",
+        "parameters": [
+          {
+            "name": "fm_web_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fm Web Session"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/files": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "List Files",
+        "operationId": "list_files_api_files_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 200,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "fm_web_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fm Web Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileDef"
+                  },
+                  "title": "Response List Files Api Files Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/files/{file_number}": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Get File",
+        "operationId": "get_file_api_files__file_number__get",
+        "parameters": [
+          {
+            "name": "file_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "File Number"
+            }
+          },
+          {
+            "name": "fm_web_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fm Web Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileDef"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/files/{file_number}/fields/{field_number}": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Get Field",
+        "operationId": "get_field_api_files__file_number__fields__field_number__get",
+        "parameters": [
+          {
+            "name": "file_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "File Number"
+            }
+          },
+          {
+            "name": "field_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "Field Number"
+            }
+          },
+          {
+            "name": "fm_web_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fm Web Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldDef"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/files/{file_number}/xrefs": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "List Cross Refs",
+        "operationId": "list_cross_refs_api_files__file_number__xrefs_get",
+        "parameters": [
+          {
+            "name": "file_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "File Number"
+            }
+          },
+          {
+            "name": "fm_web_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fm Web Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CrossRefInfo"
+                  },
+                  "title": "Response List Cross Refs Api Files  File Number  Xrefs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/files/{file_number}/entries": {
+      "get": {
+        "tags": [
+          "entries"
+        ],
+        "summary": "List Entries",
+        "operationId": "list_entries_api_files__file_number__entries_get",
+        "parameters": [
+          {
+            "name": "file_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "File Number"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "fm_web_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fm Web Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/files/{file_number}/entries/{ien}": {
+      "get": {
+        "tags": [
+          "entries"
+        ],
+        "summary": "Get Entry",
+        "operationId": "get_entry_api_files__file_number__entries__ien__get",
+        "parameters": [
+          {
+            "name": "file_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "File Number"
+            }
+          },
+          {
+            "name": "ien",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ien"
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "*",
+              "title": "Fields"
+            }
+          },
+          {
+            "name": "fm_web_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fm Web Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/packages": {
+      "get": {
+        "tags": [
+          "packages"
+        ],
+        "summary": "List Packages",
+        "operationId": "list_packages_api_packages_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 500,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "fm_web_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fm Web Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PackageDef"
+                  },
+                  "title": "Response List Packages Api Packages Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/packages/{ien}": {
+      "get": {
+        "tags": [
+          "packages"
+        ],
+        "summary": "Get Package",
+        "operationId": "get_package_api_packages__ien__get",
+        "parameters": [
+          {
+            "name": "ien",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ien"
+            }
+          },
+          {
+            "name": "fm_web_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fm Web Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PackageDef"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/packages/{ien}/files": {
+      "get": {
+        "tags": [
+          "packages"
+        ],
+        "summary": "Files By Package",
+        "operationId": "files_by_package_api_packages__ien__files_get",
+        "parameters": [
+          {
+            "name": "ien",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ien"
+            }
+          },
+          {
+            "name": "fm_web_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fm Web Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "title": "Response Files By Package Api Packages  Ien  Files Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CrossRefInfo": {
+        "properties": {
+          "ien": {
+            "type": "string",
+            "title": "Ien"
+          },
+          "file_number": {
+            "type": "number",
+            "title": "File Number"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "xref_type": {
+            "type": "string",
+            "title": "Xref Type",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "ien",
+          "file_number",
+          "name"
+        ],
+        "title": "CrossRefInfo",
+        "description": "One cross-reference on a FileMan file."
+      },
+      "Entry": {
+        "properties": {
+          "file_number": {
+            "type": "number",
+            "title": "File Number"
+          },
+          "ien": {
+            "type": "string",
+            "title": "Ien"
+          },
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldValue"
+            },
+            "type": "object",
+            "title": "Fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_number",
+          "ien"
+        ],
+        "title": "Entry",
+        "description": "One FileMan entry (row).\n\n``fields`` is keyed by FileMan field number \u2014 callers usually know\nthe numbers ahead of time (they requested them via the ``fields``\nparam of DDR GETS or DDR LISTER). When we list entries with a\ndefault field set (just .01), ``fields`` holds just that field."
+      },
+      "EntryPage": {
+        "properties": {
+          "file_number": {
+            "type": "number",
+            "title": "File Number"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/Entry"
+            },
+            "type": "array",
+            "title": "Entries"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_number",
+          "entries"
+        ],
+        "title": "EntryPage",
+        "description": "A paginated slice of entries + a cursor for the next page.\n\n``next_cursor`` is the last ``external_value`` (usually the .01\nfield) from this page \u2014 pass it back as ``cursor`` to fetch the\nnext page. ``None`` when the page is the last."
+      },
+      "FieldDef": {
+        "properties": {
+          "file_number": {
+            "type": "number",
+            "title": "File Number"
+          },
+          "field_number": {
+            "type": "number",
+            "title": "Field Number"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeSpec"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": ""
+          },
+          "storage": {
+            "type": "string",
+            "title": "Storage",
+            "default": ""
+          },
+          "input_transform": {
+            "type": "string",
+            "title": "Input Transform",
+            "default": ""
+          },
+          "help_prompt": {
+            "type": "string",
+            "title": "Help Prompt",
+            "default": ""
+          },
+          "description": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Description"
+          },
+          "set_values": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Set Values"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_number",
+          "field_number",
+          "label",
+          "type"
+        ],
+        "title": "FieldDef",
+        "description": "One field in a FileMan file."
+      },
+      "FieldValue": {
+        "properties": {
+          "field_number": {
+            "type": "number",
+            "title": "Field Number"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "is_external": {
+            "type": "boolean",
+            "title": "Is External",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "field_number",
+          "value"
+        ],
+        "title": "FieldValue",
+        "description": "One field value on an entry \u2014 external (resolved) form by default.\n\nFLAGS=\"E\" on DDR GETS ENTRY DATA returns external form (dates\nrendered, pointers resolved, set codes labeled). We never see the\ninternal form unless the caller explicitly asked for it.\nSee LESSONS-LEARNED L18."
+      },
+      "FileDef": {
+        "properties": {
+          "file_number": {
+            "type": "number",
+            "title": "File Number"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "global_root": {
+            "type": "string",
+            "title": "Global Root"
+          },
+          "package": {
+            "type": "string",
+            "title": "Package",
+            "default": ""
+          },
+          "description": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Description"
+          },
+          "fields": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldDef"
+            },
+            "type": "object",
+            "title": "Fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_number",
+          "label",
+          "global_root"
+        ],
+        "title": "FileDef",
+        "description": "One FileMan file's header + field list."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "PackageDef": {
+        "properties": {
+          "ien": {
+            "type": "string",
+            "title": "Ien"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "prefix": {
+            "type": "string",
+            "title": "Prefix",
+            "default": ""
+          },
+          "short_description": {
+            "type": "string",
+            "title": "Short Description",
+            "default": ""
+          },
+          "files": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Files"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ien",
+          "name"
+        ],
+        "title": "PackageDef",
+        "description": "One PACKAGE entry from file 9.4.\n\n``prefix`` is the M namespace (e.g. ``XU``, ``OR``). ``files`` is\npopulated only when the caller drills into the FILE subfile\n(``^DIC(9.4, IEN, 4, ...)``) \u2014 in a basic listing it's empty.\nLESSONS-LEARNED L12 notes that some sites ship a PACKAGE entry\nwith a blank prefix; that's a data-quality issue, not a bug."
+      },
+      "SessionInfo": {
+        "properties": {
+          "duz": {
+            "type": "string",
+            "title": "Duz"
+          },
+          "user_name": {
+            "type": "string",
+            "title": "User Name"
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id"
+          },
+          "uci": {
+            "type": "string",
+            "title": "Uci"
+          },
+          "app_context": {
+            "type": "string",
+            "title": "App Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "duz",
+          "user_name",
+          "site_id",
+          "uci",
+          "app_context"
+        ],
+        "title": "SessionInfo"
+      },
+      "SignonRequest": {
+        "properties": {
+          "access": {
+            "type": "string",
+            "title": "Access"
+          },
+          "verify": {
+            "type": "string",
+            "title": "Verify"
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id",
+            "default": "vehu"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access",
+          "verify"
+        ],
+        "title": "SignonRequest"
+      },
+      "TypeSpec": {
+        "properties": {
+          "raw": {
+            "type": "string",
+            "title": "Raw"
+          },
+          "base": {
+            "type": "string",
+            "title": "Base"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "is_required": {
+            "type": "boolean",
+            "title": "Is Required",
+            "default": false
+          },
+          "is_audit": {
+            "type": "boolean",
+            "title": "Is Audit",
+            "default": false
+          },
+          "is_multiple": {
+            "type": "boolean",
+            "title": "Is Multiple",
+            "default": false
+          },
+          "pointer_file": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pointer File"
+          },
+          "numeric_width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numeric Width"
+          },
+          "numeric_decimals": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numeric Decimals"
+          },
+          "modifiers": {
+            "type": "string",
+            "title": "Modifiers",
+            "default": ""
+          },
+          "lowercase_mods": {
+            "type": "string",
+            "title": "Lowercase Mods",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "raw",
+          "base",
+          "name"
+        ],
+        "title": "TypeSpec",
+        "description": "Decomposed FileMan type.\n\n``raw`` preserves the exact string from ``^DD`` for display and\naudit; all other fields are interpretation of it."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

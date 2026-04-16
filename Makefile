@@ -26,6 +26,13 @@ frontend-build:
 frontend-lint:
 	cd frontend && npm run lint
 
+# Regenerate frontend/src/types/api.ts from FastAPI's OpenAPI schema.
+# Run after any backend route change so the TS types stay in sync.
+frontend-types:
+	$(PYTHON) -c "from fm_web.api.app import create_app; import json; print(json.dumps(create_app().openapi(), indent=2))" \
+		> frontend/src/types/openapi.json
+	cd frontend && npx openapi-typescript src/types/openapi.json -o src/types/api.ts
+
 # Run FastAPI backend on :8000 (Vite proxies /api to it)
 dev:
 	$(UVICORN) fm_web.api.app:app --reload --port 8000
