@@ -77,8 +77,8 @@ class TestListFiles:
         svc.list_files()
         calls = [c for c in broker_with_files.calls if c.rpc_name == "DDR LISTER"]
         assert calls, "expected at least one DDR LISTER call"
-        # First arg must be "1" for the FILE registry
-        assert calls[0].params[0] == "1"
+        # First arg must be a dict with FILE="1" for the FILE registry
+        assert calls[0].params[0]["FILE"] == "1"
 
 
 # ---- get_file ------------------------------------------------------
@@ -108,7 +108,18 @@ class TestGetFile:
                 # Field subfile of file 1 (#1.01): fields on file 200.
                 (
                     "DDR LISTER",
-                    ("1", ",200,", "P", "200", "", "0", "", "B", "", ""),
+                    (
+                        ("FIELDS", ""),
+                        ("FILE", "1"),
+                        ("FLAGS", "P"),
+                        ("FROM", ""),
+                        ("ID", ""),
+                        ("IENS", ",200,"),
+                        ("MAX", "200"),
+                        ("PART", ""),
+                        ("SCREEN", ""),
+                        ("XREF", "B"),
+                    ),
                 ): _file_list_response(
                     [
                         (".01", "NAME"),
@@ -191,16 +202,16 @@ class TestListCrossRefs:
                 (
                     "DDR LISTER",
                     (
-                        ".11",
-                        "",
-                        "P",
-                        "200",
-                        "",
-                        "0",
-                        "",
-                        "B",
-                        'I $P(^DD("IX",Y,0),U)=200',
-                        "",
+                        ("FIELDS", ""),
+                        ("FILE", ".11"),
+                        ("FLAGS", "P"),
+                        ("FROM", ""),
+                        ("ID", ""),
+                        ("IENS", ""),
+                        ("MAX", "200"),
+                        ("PART", ""),
+                        ("SCREEN", 'I $P(^DD("IX",Y,0),U)=200'),
+                        ("XREF", "B"),
                     ),
                 ): _file_list_response(
                     [

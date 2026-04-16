@@ -95,17 +95,46 @@ def parse_gets_response(raw: str) -> list[GetsEntry]:
 def parse_lister_response(raw: str) -> list[ListerEntry]:
     """Parse ``DDR LISTER`` output into :class:`ListerEntry` objects.
 
-    Format: first line is the total count (discarded); each subsequent
-    line is ``ien^external_value[^extra1[^extra2...]]``.
+    Handles two wire shapes:
+
+    * **Simple** — first line is a total count; each subsequent line
+      is ``ien^external_value[^extra...]``.
+    * **Sectioned (VEHU V0)** — response has ``[Misc]``, ``[Data]``,
+      and optionally ``[Errors]`` section markers. Only lines inside
+      the ``[Data]`` section are entries. ``[Misc]`` carries pagination
+      metadata (``MORE^from_value^from_ien``).
+
+    Lines starting with ``[`` are section markers and are always
+    skipped. The first line of the simple format (the count) is also
+    skipped.
     """
     out: list[ListerEntry] = []
     lines = raw.replace("\r\n", "\n").split("\n")
-    for raw_line in lines[1:]:
+    in_data = False
+    for i, raw_line in enumerate(lines):
         line = raw_line.strip()
         if not line:
             continue
+        # Section markers
+        if line.startswith("["):
+            in_data = line == "[Data]"
+            continue
+        # Simple format: skip the first line (count)
+        if i == 0 and not in_data:
+            # Might be a numeric count OR a [Misc] marker (handled above).
+            # If it looks like a plain number, skip it.
+            if line.isdigit():
+                continue
+        # If we saw a [Data] marker, only accept lines inside it.
+        # If we never saw any section markers (simple format), accept
+        # everything after the count line.
+        if not in_data and any(ln.strip().startswith("[") for ln in lines):
+            continue
         parts = line.split("^")
         ien = parts[0]
+        # Skip metadata-like entries (MORE, BEGIN_diERRORS, etc.)
+        if ien.startswith("MORE") or ien.startswith("BEGIN"):
+            continue
         external_value = parts[1] if len(parts) > 1 else ""
         extras = {str(i): parts[i] for i in range(2, len(parts)) if parts[i]}
         out.append(

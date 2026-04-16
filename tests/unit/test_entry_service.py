@@ -72,7 +72,7 @@ class TestListEntries:
         svc = EntryService(broker)
         svc.list_entries(2, limit=5, cursor="BOB")
         call = next(c for c in broker.calls if c.rpc_name == "DDR LISTER")
-        assert call.params[4] == "BOB"
+        assert call.params[0]["FROM"] == "BOB"
 
 
 class TestGetEntry:

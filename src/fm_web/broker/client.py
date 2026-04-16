@@ -229,21 +229,27 @@ class VistARpcBroker:
         fields: str = "",
         flags: str = "P",
     ) -> list[ListerEntry]:
-        """``DDR LISTER`` → typed entries."""
+        """``DDR LISTER`` → typed entries.
+
+        VEHU's ``LISTC^DDR`` reads params from a local M array (TY=2
+        list-type), not as positional literals. Keys:
+        ``FILE IENS FIELDS FLAGS MAX FROM PART XREF SCREEN ID``.
+        See ``PARSE`` subroutine in DDR.m.
+        """
         fn = _fmt_file_num(file_number)
-        raw = self.call(
-            "DDR LISTER",
-            fn,
-            fields,
-            flags,
-            str(max_entries),
-            from_value,
-            "1" if part else "0",
-            value,
-            xref,
-            screen,
-            identifier,
-        )
+        ddr: dict[str, str] = {
+            "FILE": fn,
+            "IENS": "",
+            "FIELDS": fields,
+            "FLAGS": flags,
+            "MAX": str(max_entries),
+            "FROM": from_value,
+            "PART": "1" if part else "",
+            "XREF": xref,
+            "SCREEN": screen,
+            "ID": identifier,
+        }
+        raw = self.call("DDR LISTER", ddr)
         return parse_lister_response(raw)
 
     def find1(
@@ -256,7 +262,16 @@ class VistARpcBroker:
     ) -> str:
         """``DDR FIND1`` → a single IEN (``""`` if not found)."""
         fn = _fmt_file_num(file_number)
-        return self.call("DDR FIND1", fn, value, xref, screen).strip()
+        ddr: dict[str, str] = {
+            "FILE": fn,
+            "FIELDS": "",
+            "FLAGS": "",
+            "VALUE": value,
+            "XREF": xref,
+            "SCREEN": screen,
+        }
+        raw = self.call("DDR FIND1", ddr)
+        return raw.strip()
 
     def finder(
         self,
@@ -270,17 +285,16 @@ class VistARpcBroker:
     ) -> list[str]:
         """``DDR FINDER`` → list of IEN strings."""
         fn = _fmt_file_num(file_number)
-        raw = self.call(
-            "DDR FINDER",
-            fn,
-            xref,
-            "",
-            "1",
-            value,
-            str(max_entries),
-            screen,
-            flags,
-        )
+        ddr: dict[str, str] = {
+            "FILE": fn,
+            "FIELDS": "",
+            "FLAGS": flags,
+            "MAX": str(max_entries),
+            "VALUE": value,
+            "XREF": xref,
+            "SCREEN": screen,
+        }
+        raw = self.call("DDR FINDER", ddr)
         return parse_finder_response(raw)
 
     # ---------------- test seam ---------------------------------------

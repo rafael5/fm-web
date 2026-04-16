@@ -136,7 +136,18 @@ class TestFilesRoutes:
                 # Field subfile
                 (
                     "DDR LISTER",
-                    ("1", ",200,", "P", "200", "", "0", "", "B", "", ""),
+                    (
+                        ("FIELDS", ""),
+                        ("FILE", "1"),
+                        ("FLAGS", "P"),
+                        ("FROM", ""),
+                        ("ID", ""),
+                        ("IENS", ",200,"),
+                        ("MAX", "200"),
+                        ("PART", ""),
+                        ("SCREEN", ""),
+                        ("XREF", "B"),
+                    ),
                 ): _lister([(".01", "NAME"), ("2", "ACCESS CODE")]),
             }
         )

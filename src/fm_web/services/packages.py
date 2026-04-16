@@ -35,16 +35,18 @@ class PackageService:
         """List every PACKAGE entry (shallow — no prefix/files loaded)."""
         raw = self._broker.call(
             "DDR LISTER",
-            "9.4",
-            "",
-            "P",
-            str(limit),
-            "",
-            "0",
-            "",
-            "B",
-            "",
-            "",
+            {
+                "FILE": "9.4",
+                "IENS": "",
+                "FIELDS": "",
+                "FLAGS": "P",
+                "MAX": str(limit),
+                "FROM": "",
+                "PART": "",
+                "XREF": "B",
+                "SCREEN": "",
+                "ID": "",
+            },
         )
         return [
             PackageDef(ien=row.ien, name=row.external_value)
@@ -92,16 +94,18 @@ class PackageService:
         """
         raw = self._broker.call(
             "DDR LISTER",
-            "9.4",
-            f",{ien},",
-            "P",
-            str(limit),
-            "",
-            "0",
-            "",
-            "B",
-            "",
-            "",
+            {
+                "FILE": "9.4",
+                "IENS": f",{ien},",
+                "FIELDS": "",
+                "FLAGS": "P",
+                "MAX": str(limit),
+                "FROM": "",
+                "PART": "",
+                "XREF": "B",
+                "SCREEN": "",
+                "ID": "",
+            },
         )
         out: list[float] = []
         for row in parse_lister_response(raw):

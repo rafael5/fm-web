@@ -42,7 +42,7 @@ class TestListPackages:
         svc = PackageService(broker)
         svc.list_packages()
         call = next(c for c in broker.calls if c.rpc_name == "DDR LISTER")
-        assert call.params[0] == "9.4"
+        assert call.params[0]["FILE"] == "9.4"
 
 
 class TestGetPackage:
@@ -102,5 +102,5 @@ class TestFilesByPackage:
         # Expected: DDR LISTER FILE=9.4 IENS=",1," — the FILE subfile
         # scoped to package IEN=1.
         call = next(c for c in broker.calls if c.rpc_name == "DDR LISTER")
-        assert call.params[0] == "9.4"
-        assert call.params[1] == ",1,"
+        assert call.params[0]["FILE"] == "9.4"
+        assert call.params[0]["IENS"] == ",1,"

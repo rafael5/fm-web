@@ -81,16 +81,18 @@ class DataDictionaryService:
         """
         raw = self._broker.call(
             "DDR LISTER",
-            "1",
-            "",
-            "P",
-            str(limit),
-            "",
-            "0",
-            "",
-            "B",
-            "",
-            "",
+            {
+                "FILE": "1",
+                "IENS": "",
+                "FIELDS": ".01",
+                "FLAGS": "P",
+                "MAX": str(limit),
+                "FROM": "",
+                "PART": "",
+                "XREF": "B",
+                "SCREEN": "",
+                "ID": "",
+            },
         )
         out: list[FileDef] = []
         for row in parse_lister_response(raw):
@@ -133,16 +135,18 @@ class DataDictionaryService:
         # Walk the FIELD subfile of file 1 for this file.
         fields_raw = self._broker.call(
             "DDR LISTER",
-            "1",
-            f",{n},",
-            "P",
-            "200",
-            "",
-            "0",
-            "",
-            "B",
-            "",
-            "",
+            {
+                "FILE": "1",
+                "IENS": f",{n},",
+                "FIELDS": "",
+                "FLAGS": "P",
+                "MAX": "200",
+                "FROM": "",
+                "PART": "",
+                "XREF": "B",
+                "SCREEN": "",
+                "ID": "",
+            },
         )
         fields: dict[float, FieldDef] = {}
         for row in parse_lister_response(fields_raw):
@@ -224,16 +228,18 @@ class DataDictionaryService:
         screen = f'I $P(^DD("IX",Y,0),U)={n}'
         raw = self._broker.call(
             "DDR LISTER",
-            ".11",
-            "",
-            "P",
-            "200",
-            "",
-            "0",
-            "",
-            "B",
-            screen,
-            "",
+            {
+                "FILE": ".11",
+                "IENS": "",
+                "FIELDS": "",
+                "FLAGS": "P",
+                "MAX": "200",
+                "FROM": "",
+                "PART": "",
+                "XREF": "B",
+                "SCREEN": screen,
+                "ID": "",
+            },
         )
         out: list[CrossRefInfo] = []
         for row in parse_lister_response(raw):

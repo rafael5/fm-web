@@ -52,16 +52,18 @@ class EntryService:
         n = _fmt(file_number)
         raw = self._broker.call(
             "DDR LISTER",
-            n,
-            "",
-            "P",
-            str(limit),
-            cursor,
-            "0",
-            "",
-            xref,
-            "",
-            "",
+            {
+                "FILE": n,
+                "IENS": "",
+                "FIELDS": "",
+                "FLAGS": "P",
+                "MAX": str(limit),
+                "FROM": cursor,
+                "PART": "",
+                "XREF": xref,
+                "SCREEN": "",
+                "ID": "",
+            },
         )
         rows = parse_lister_response(raw)
         entries: list[Entry] = []
