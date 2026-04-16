@@ -13,6 +13,6 @@
     "",
     ""
   ],
-  "raw_response": ")Application context has not been created!\u0000",
-  "recorded_at": "2026-04-15T23:39:08.901199+00:00"
+  "raw_response": "<M ERROR: VistA M error: '\\x18M  ERROR=LISTC^DDR, More actual parameters than formal parameters: ,150374474,-%YDB-E-ACTLSTTOOLONG\\r\\nLAST REF=^%ZTSCH(\"LOGRSRC\")'>",
+  "recorded_at": "2026-04-16T00:59:56.099341+00:00"
 }

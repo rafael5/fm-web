@@ -100,6 +100,13 @@ ALLOWED_RPCS: tuple[AllowedRpc, ...] = (
         "(Kernel broker keepalive)",
         "Session keepalive; prevents idle timeout on long reads.",
     ),
+    AllowedRpc(
+        "XWB CREATE CONTEXT",
+        "CRCONTXT^XWBSEC",
+        "Switch broker context after signon to the app's option (e.g. "
+        "'OR CPRS GUI CHART'); required before DDR* calls. Option name "
+        "must be XUSRB1-encrypted. See LESSONS-LEARNED L33.",
+    ),
 )
 
 

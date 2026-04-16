@@ -1,0 +1,9 @@
+{
+  "rpc_name": "XWB CREATE CONTEXT",
+  "variant": "or_cprs_gui_chart",
+  "params": [
+    "OR CPRS GUI CHART"
+  ],
+  "raw_response": "1",
+  "recorded_at": "2026-04-16T00:59:54.091395+00:00"
+}

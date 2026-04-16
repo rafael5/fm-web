@@ -4,6 +4,6 @@
   "params": [
     "<redacted ciphertext>"
   ],
-  "raw_response": "0\r\n0\r\n0\r\nNot a valid ACCESS CODE/VERIFY CODE pair.\r\n0\r\n0\r\n",
-  "recorded_at": "2026-04-15T23:39:04.897580+00:00"
+  "raw_response": "1497\r\n0\r\n0\r\n\r\n0\r\n0\r\n\r\nGood morning FAKEDOC,ONE\r\n     You last signed on today at 00:59\r\n",
+  "recorded_at": "2026-04-16T00:59:54.089956+00:00"
 }

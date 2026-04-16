@@ -90,10 +90,16 @@ Keeps the XWB NS-mode wire implementation (derived from `XWBPRS.m`/
 | `DDR FINDER` | `FIND^DIC` | Search by cross-reference |
 | `DDR FIND1` | `FIND1^DIC` | Single-match lookup |
 | `DDR GETS ENTRY DATA` | `GETS^DIQ` | Fetch field values by IEN, external form |
-| `DDR GET DD HASH` | (internal) | Cheap DD-version fingerprint |
-| `DDR GET DD` | `$$GET1^DID` et al. | File/field attribute retrieval |
 | `ORWU DT` | `$$DT^DICRW` | Current FileMan date (env probe) |
 | `XWB IM HERE` | keepalive | Session keepalive |
+
+**Removed in phase 1 (see LESSONS-LEARNED L31):** `DDR GET DD` and
+`DDR GET DD HASH` were on the initial allow-list but VEHU empirically
+returns `"Remote Procedure 'DDR GET DD' doesn't exist on the server."`
+for both. They are not universal across VistA distributions. DD browsing
+is rebuilt on top of `DDR LISTER` + `DDR GETS ENTRY DATA` against
+**file #1 (FILE)** and its FIELD subfile — both use core FileMan
+entrypoints (`LIST^DIC`, `GETS^DIQ`) that ship with every site. See §5.
 
 **Deferred to v2:** `XWB GET VARIABLE VALUE` (needed for raw-global tree view
 and `$$VFILE^DILFD` cheap counts). Many sites disable it; the v1 UI makes no
@@ -110,7 +116,8 @@ produces typed results.
 - `EntryService` — `list_entries(file, fields, start_ien=None, limit, order)`,
   `get_entry(file, ien, fields='*') → Entry` (external form by default).
 - `PackageService` — enumerate `^DIC(9.4)` via `DDR LISTER` on file 9.4.
-- `SiteService` — current session, UCI, FileMan version, DD hash, server DT.
+- `SiteService` — current session, UCI, FileMan version, client-side
+  DD fingerprint (see §5), server DT.
 - `DocLinkService` (phase 2) — SQLite read-only over `frontmatter.db`.
 
 Domain models (Pydantic v2): `FileDef`, `FieldDef`, `TypeSpec`, `Entry`,
@@ -161,8 +168,8 @@ forced to re-sign-on.
 1. **Sign-on.** Site dropdown (from config) + ACCESS + VERIFY.
 2. **File browser.** Searchable list with name / number / global / package /
    entry-count / field-count columns. Virtualized.
-3. **File detail.** Header panel (label, global, package, DD hash) · fields
-   table · cross-refs table · tabs.
+3. **File detail.** Header panel (label, global, package, DD fingerprint) ·
+   fields table · cross-refs table · tabs.
 4. **Field detail drawer.** Label, type (human-readable decomposition), set
    values, pointer target, help-prompt, description, input transform, last
    edited.
@@ -171,8 +178,8 @@ forced to re-sign-on.
 6. **Entry detail.** All fields for one IEN via `DDR GETS ENTRY DATA` with
    `.01;…;9999999` field wildcard resolution done server-side.
 7. **Package view.** List packages with file counts; click to see owned files.
-8. **Diagnostics.** Current session, RPC call log (last 200), DD hash, FM
-   version, server DT.
+8. **Diagnostics.** Current session, RPC call log (last 200), client-side
+   DD fingerprint per visited file, FM version, server DT.
 
 **Phase 2 addition:** every file header shows a "Documentation" panel with
 links sourced from `frontmatter.db` — doc title, app, patch, URL(s). Every
@@ -199,21 +206,50 @@ DDR GETS ENTRY DATA
   is done by FileMan itself (per lesson L12 in LESSONS-LEARNED.md).
 ```
 
-**Get a file's header + field list:**
+**Enumerate all FileMan files (via the FILE registry):**
 
 ```
-DDR GET DD
-  FILE=2  FLAG="AL"
-→ label, global root, .01 field, index list, all field definitions with
-  types — replaces our from-scratch ^DD walker entirely.
+DDR LISTER
+  FILE=1  IENS=""  FIELDS=".01;.1"  FLAGS="P"  NUMBER=25  XREF="B"
+→ one row per file in the system: IEN=file_number, piece 1 = NAME,
+  piece 2 = GLOBAL ROOT. Cursor-paginate via FROM=<last_external_value>.
 ```
 
-**Detect DD drift between sites:**
+**Get a file's header (label + global):**
 
 ```
-DDR GET DD HASH  FILE=2
-→ short fingerprint; cache per (site, file_number); invalidate if changed.
+DDR GETS ENTRY DATA
+  FILE=1  IENS="<file_number>,"  FIELDS=".01;.1"  FLAGS="E"
+→ .01 = NAME, .1 = GLOBAL ROOT. For a deeper read add PACKAGE pointer,
+  DESCRIPTION (multiple), etc.
 ```
+
+**Get a file's field list (via file #1's FIELD subfile):**
+
+```
+DDR LISTER
+  FILE=1  IENS=",<file_number>,"  FIELDS=".01;1"  FLAGS="P"  NUMBER=200
+  XREF="B"
+→ one row per field: IEN=field_number, piece 1 = field NAME,
+  piece 2 = raw TYPE string (parsed downstream by TypeSpec).
+```
+
+**Detect DD drift between sites (fallback — no `DDR GET DD HASH`):**
+
+```
+Client-side fingerprint over (file_number, field_number, label, type_raw)
+tuples from the above LISTER response:
+    h = sha256(sorted(f"{n}|{lbl}|{type_raw}" for each field))[:12]
+→ short stable hash; cache per (site, file_number). Equivalent signal
+  to a server-computed hash but portable across FileMan distributions
+  that don't ship `DDR GET DD HASH`. See LESSONS-LEARNED L31.
+```
+
+**Why not `DDR GET DD`?** Empirically absent on the VEHU broker (contract
+fixture `tests/contract/fixtures/ddr_get_dd__patient_AL.json` records the
+rejection). Using `DDR LISTER` + `DDR GETS ENTRY DATA` on file #1 is more
+portable (core FileMan, universally available) and reuses the same parse
+pipeline as normal entry browsing.
 
 ## 6. Repo structure (`fm-web/`)
 

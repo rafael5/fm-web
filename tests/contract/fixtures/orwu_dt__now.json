@@ -2,6 +2,6 @@
   "rpc_name": "ORWU DT",
   "variant": "now",
   "params": [],
-  "raw_response": ")Application context has not been created!\u0000",
-  "recorded_at": "2026-04-15T23:39:06.898182+00:00"
+  "raw_response": "<M ERROR: VistA M error: '\\x18M  ERROR=DT+2^ORWU, Undefined local variable: X,150373850,-%YDB-E-LVUNDEF\\r\\nLAST REF=^%ZTSCH(\"LOGRSRC\")'>",
+  "recorded_at": "2026-04-16T00:59:55.094866+00:00"
 }

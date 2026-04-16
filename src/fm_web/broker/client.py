@@ -41,7 +41,11 @@ log = logging.getLogger(__name__)
 
 DEFAULT_HOST = "localhost"
 DEFAULT_PORT = 9430
-DEFAULT_APP = "FM BROWSER"
+# "OR CPRS GUI CHART" is the standard broker-authorized option that
+# ships on every VistA with CPRS. We use it (rather than inventing a
+# fm-web-specific context) so no server-side install is required.
+# See LESSONS-LEARNED L32.
+DEFAULT_APP = "OR CPRS GUI CHART"
 DEFAULT_UCI = "VAH"
 DEFAULT_TIMEOUT = 10.0
 RECV_SIZE = 8192
@@ -139,11 +143,29 @@ class VistARpcBroker:
 
     # ---------------- high-level helpers ------------------------------
 
-    def signon(self, access_code: str, verify_code: str) -> str:
-        """Run SIGNON SETUP + AV CODE + return DUZ.
+    def signon(
+        self,
+        access_code: str,
+        verify_code: str,
+        app_context: str | None = None,
+    ) -> str:
+        """Run SIGNON SETUP + AV CODE + CREATE CONTEXT; return DUZ.
 
-        Encrypts credentials with XUSRB1 first (matching CPRS client
-        behavior). Returns the DUZ as a string on success.
+        Three RPCs in order:
+
+        1. ``XUS SIGNON SETUP`` — reads the sign-on screen text.
+        2. ``XUS AV CODE`` — sends XUSRB1-encrypted ``ACCESS;VERIFY``.
+           Success means DUZ > 0.
+        3. ``XWB CREATE CONTEXT`` — switches the broker's active
+           option from the default ``XUS SIGNON`` context to a real
+           application context (default ``OR CPRS GUI CHART``).
+           Without this step, every subsequent DDR* / ORWU call
+           returns ``"Application context has not been created!"``.
+           See LESSONS-LEARNED L33 for the discovery trace.
+
+        ``app_context`` overrides the default (``OR CPRS GUI CHART``)
+        — useful if a site has a different context set up for
+        read-only browser tools.
         """
         self.call("XUS SIGNON SETUP")
         plaintext = f"{access_code};{verify_code}"
@@ -158,6 +180,15 @@ class VistARpcBroker:
             )
         if duz <= 0:
             raise AuthenticationError(f"authentication failed (DUZ={duz}): {result!r}")
+        # Switch broker context. OPTION name is encrypted via the same
+        # XUSRB1 cipher the server uses for decryption (DECRYP^XUSRB1).
+        ctx = app_context or DEFAULT_APP
+        ctx_encrypted = crypt.encrypt(ctx)
+        ctx_result = self.call("XWB CREATE CONTEXT", ctx_encrypted)
+        if ctx_result and "does not exist" in ctx_result:
+            raise AuthenticationError(
+                f"app context {ctx!r} not found on server: {ctx_result!r}"
+            )
         return duz_line
 
     def signoff(self) -> None:

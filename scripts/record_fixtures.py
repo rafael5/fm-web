@@ -144,60 +144,87 @@ def main() -> int:
             "recording only unauthenticated fixtures",
             args.access,
         )
+    else:
+        # Switch broker context so downstream DDR* calls are accepted.
+        ctx_encrypted = _encrypt(args.app)
+        ctx_raw = _raw_call(broker, "XWB CREATE CONTEXT", ctx_encrypted)
+        _save("XWB CREATE CONTEXT", "or_cprs_gui_chart", [args.app], ctx_raw)
 
     # Everything below typically requires DUZ > 0. We still attempt each
     # call and capture the server's response — whether it's a real payload
     # or an auth-required rejection, the raw text is a valid fixture.
 
+    def _try(label: str, rpc_name: str, *params: str | dict[str, str]) -> None:
+        """Record one RPC; capture server-side errors as fixtures too."""
+        try:
+            raw = _raw_call(broker, rpc_name, *params)
+        except Exception as exc:
+            # BrokerProtocolError / M errors — capture the message verbatim
+            # so we can assert shapes on the error path too.
+            raw = f"<M ERROR: {exc}>"
+        _save(rpc_name, label, list(params), raw)
+
     # ---- ORWU DT ---------------------------------------------------------
-    raw = _raw_call(broker, "ORWU DT")
-    _save("ORWU DT", "now", [], raw)
+    _try("now", "ORWU DT")
 
     # ---- XUS GET USER INFO ----------------------------------------------
-    try:
-        raw = _raw_call(broker, "XUS GET USER INFO")
-        _save("XUS GET USER INFO", "default", [], raw)
-    except Exception as exc:
-        log.warning("XUS GET USER INFO failed: %s", exc)
+    _try("default", "XUS GET USER INFO")
 
     # ---- DDR LISTER — small page of PATIENT file -----------------------
-    lister_params = ["2", "", "P", "5", "", "0", "", "B", "", ""]
-    raw = _raw_call(broker, "DDR LISTER", *lister_params)
-    _save("DDR LISTER", "patient_first5", list(lister_params), raw)
+    _try(
+        "patient_first5",
+        "DDR LISTER",
+        "2",
+        "",
+        "P",
+        "5",
+        "",
+        "0",
+        "",
+        "B",
+        "",
+        "",
+    )
 
     # ---- DDR LISTER — NEW PERSON, first 5 -------------------------------
-    lister_params2 = ["200", "", "P", "5", "", "0", "", "B", "", ""]
-    raw = _raw_call(broker, "DDR LISTER", *lister_params2)
-    _save("DDR LISTER", "new_person_first5", list(lister_params2), raw)
+    _try(
+        "new_person_first5",
+        "DDR LISTER",
+        "200",
+        "",
+        "P",
+        "5",
+        "",
+        "0",
+        "",
+        "B",
+        "",
+        "",
+    )
 
-    # ---- DDR GETS ENTRY DATA — PATIENT 1, all fields -------------------
-    gets_param: dict[str, str] = {
-        "FILE": "2",
-        "IENS": "1,",
-        "FIELDS": ".01;.02;.03;.09",
-        "FLAGS": "E",
-    }
-    raw = _raw_call(broker, "DDR GETS ENTRY DATA", gets_param)
-    _save("DDR GETS ENTRY DATA", "patient_1_basic", [gets_param], raw)
+    # ---- DDR GETS ENTRY DATA — NEW PERSON IEN=1 (POSTMASTER) ------------
+    _try(
+        "new_person_1_basic",
+        "DDR GETS ENTRY DATA",
+        {"FILE": "200", "IENS": "1,", "FIELDS": ".01;1;2", "FLAGS": "E"},
+    )
 
     # ---- DDR FIND1 — search NEW PERSON by access code ------------------
-    try:
-        raw = _raw_call(broker, "DDR FIND1", "200", args.access, "A", "")
-        _save("DDR FIND1", "new_person_by_access", ["200", args.access, "A", ""], raw)
-    except Exception as exc:
-        log.warning("DDR FIND1 failed: %s", exc)
+    _try("new_person_by_access", "DDR FIND1", "200", args.access, "A", "")
 
     # ---- DDR FINDER — partial name search on PATIENT file --------------
-    try:
-        raw = _raw_call(broker, "DDR FINDER", "2", "B", "", "1", "A", "5", "", "")
-        _save(
-            "DDR FINDER",
-            "patient_by_a_prefix",
-            ["2", "B", "", "1", "A", "5", "", ""],
-            raw,
-        )
-    except Exception as exc:
-        log.warning("DDR FINDER failed: %s", exc)
+    _try(
+        "patient_by_a_prefix",
+        "DDR FINDER",
+        "2",
+        "B",
+        "",
+        "1",
+        "A",
+        "5",
+        "",
+        "",
+    )
 
     # ---- DDR GET DD — file 2 header + field list -----------------------
     try:

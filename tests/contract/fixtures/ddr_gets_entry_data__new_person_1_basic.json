@@ -1,16 +1,16 @@
 {
   "rpc_name": "DDR GETS ENTRY DATA",
-  "variant": "patient_1_basic",
+  "variant": "new_person_1_basic",
   "params": [
     {
       "_dict": [
         [
           "FIELDS",
-          ".01;.02;.03;.09"
+          ".01;1;2"
         ],
         [
           "FILE",
-          "2"
+          "200"
         ],
         [
           "FLAGS",
@@ -23,6 +23,6 @@
       ]
     }
   ],
-  "raw_response": ")Application context has not been created!\u0000",
-  "recorded_at": "2026-04-15T23:39:12.905020+00:00"
+  "raw_response": "[Data]\r\n200^1^.01^^PROGRAMMER,ONE\r\n200^1^1^^EC\r\n200^1^2^^<Hidden>\r\n",
+  "recorded_at": "2026-04-16T00:59:57.105966+00:00"
 }

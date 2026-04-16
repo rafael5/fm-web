@@ -415,34 +415,99 @@ VistA. DD-drift detection becomes a fingerprint over the LISTER response
 ARCHITECTURE.md §5 needs a phase-2 revision; this file is the authority
 until then.
 
-### L32. VEHU session state drifts — demo credentials can silently break
+### L32. VEHU demo credentials drift and must be recreated
 
 **Finding:** The documented VEHU demo credentials `fakedoc1 / 1Doc!@#$`
-fail against the currently running `yottadb/octo-vehu` image. An
-independent probe (`ZWR ^VA(200, IEN, 0)` for the first 10 IENs) showed
-no user named `fakedoc1` — the image ships the POSTMASTER / PROGRAMMER
-family of default accounts instead.
+are absent from the current `yottadb/octo-vehu` image (NEW PERSON dump
+shows only POSTMASTER / PROGRAMMER defaults). A one-shot Python setup
+script (`scripts/setup_vehu_user.py`) creates the user idempotently
+via direct-global manipulation.
+
+**Storage quirks discovered while writing the setup script:**
+- ACCESS CODE → zero-node piece 3, uppercased plaintext.
+- VERIFY CODE → subnode **`.1`** piece 2 (the DD says `.1;2`).
+  `USER^XUS` reads it as `XUSER(1)=$G(^(.1))`. Do NOT write to
+  subnode "1" — that's a different node.
+- Access lookup uses `^VA(200,"A", $$UP($$EN^XUSHSH(access)), IEN)`.
+  `EN^XUSHSH` is IDENTITY in VEHU — the "hashed" xref key is simply
+  the uppercased access code. Other sites may apply real hashing.
+- On direct-mode MUMPS via the VEHU container: the `ydb_routines`
+  env var must be **unset** (it points at `/root/.yottadb/...` and
+  shadows the `gtmroutines` that actually resolves to `/home/vehu/r/`).
+  Also export `ydb_chset=M LC_CTYPE=C` or object files with CHSET=M
+  fail to link.
 
 **Why it matters:** Every contract test that requires authentication
-depends on valid credentials. If they silently rotate, every DDR*-
-requiring fixture records `"Application context has not been created!"`
-instead of real data — testing the error path, not the happy path.
+depends on valid credentials. Setting them via FileMan DIE from a
+container subprocess was blocked by the env issues above; Python+ydb
+direct global manipulation bypassed those entirely.
 
 **fm-web takeaway:**
-- Credentials live in per-site `sites.yaml`; never hardcode in tests.
-  Recording script accepts `--access` / `--verify` flags + env vars.
-- Contract tests assert the *shape* of responses (happy or error),
-  not specific content values — a test relying on happy-path skips
-  gracefully if the fixture captured an error.
-- Add a scripted idempotent dev-user setup (e.g. `scripts/setup_vehu_user.m`)
-  that creates a known account on first run. Deferred to phase 1.1
-  follow-up — must land before contract tests can cover DDR* happy paths.
+- `scripts/setup_vehu_user.py` is the source of truth for the dev
+  user. Re-run any time the VEHU image is rebuilt.
+- Contract tests assert response *shapes* rather than specific
+  content so the test suite survives small drift (e.g. IEN
+  assignment changes).
 
-**Diagnostic evidence in fixtures:**
-- `xus_av_code__response.json` → `0\r\n0\r\n0\r\nNot a valid ACCESS
-  CODE/VERIFY CODE pair.\r\n...`
-- `xus_signon_setup__default.json` (pre-auth; works) → real VEHU site
-  metadata including UCI `VAH` and hostname.
+### L33. `XWB CREATE CONTEXT` is required after signon, not implicit
+
+**Finding:** Passing `app="OR CPRS GUI CHART"` in the NS-mode
+TCPConnect handshake does NOT switch the broker into that application
+context — it only logs the app name. The broker starts every session
+in the internal `XUS SIGNON` context, which rejects everything outside
+a short whitelist (`XUS*`, `XWB*`). All DDR* calls fail with
+`"Application context has not been created!"` until the client
+explicitly calls **`XWB CREATE CONTEXT`** (`CRCONTXT^XWBSEC`) with an
+XUSRB1-encrypted option name.
+
+**Evidence:** `XWBSEC.m:24` — the gate check lives here.
+
+**fm-web takeaway:** `VistARpcBroker.signon()` now runs three RPCs in
+order: `XUS SIGNON SETUP` → `XUS AV CODE` → `XWB CREATE CONTEXT`.
+The third call is mandatory. Added `XWB CREATE CONTEXT` to the
+allow-list. The standard session flow for every connection is baked
+into signon().
+
+### L34. Broker-authorized options don't auto-include every RPC
+
+**Finding:** `OR CPRS GUI CHART` exists on VEHU as a type-B option,
+but its RPC subfile (multiple #19.05) lists only the set of RPCs
+CPRS itself invokes. `DDR LISTER`, `DDR GETS ENTRY DATA`, `DDR
+FIND1`, `DDR FINDER`, `XWB CREATE CONTEXT`, `XUS GET USER INFO`,
+and `XWB IM HERE` are **not** pre-attached to this option. Calling
+them returns `"The remote procedure DDR LISTER is not registered
+to the option OR CPRS GUI CHART."`
+
+**fm-web takeaway:** `scripts/setup_vehu_user.py` attaches the
+required RPCs to the option's RPC subfile (`^DIC(19, OPT_IEN,
+"RPC", sub_ien, 0) = RPC_IEN` + "B" xref). This is a one-time
+per-image setup. In a production site, fm-web would either:
+(a) request that IRM attach the RPCs to an existing option, or
+(b) ship with a tiny install option specifically for the browser
+(but doing so reintroduces the "must not install anything" anti-goal
+— so option (a) is the deployment path).
+
+### L35. DDR LISTER / FIND1 / FINDER signatures drift across VEHU builds
+
+**Finding:** When we pass the 10-argument LISTER signature inherited
+from vista-fm-browser, VEHU's `LISTC^DDR` responds with
+`"More actual parameters than formal parameters"` (ACTLSTTOOLONG).
+The formal arg list in this VEHU build is shorter than the wrapper
+vista-fm-browser was written against — FileMan DBS API drift.
+Same issue hits `FIND1C^DDR2` and `FINDC^DDR0`.
+
+**fm-web takeaway:** Phase 2 services must inspect each DDR* entry
+point's signature on the target site at startup (or probe once with
+decreasing argument counts) and adapt. The LISTER wrapper in
+`client.py` should call with the minimum-required args by default
+and treat extras as optional. Capturing the error shape in contract
+fixtures ensures we detect the regression on any site that agrees
+with our signature (happy path) vs. those that don't (error path).
+
+**Deferred follow-up:** Detect working DDR LISTER arity at signon
+via a no-op probe; cache per-site. Not blocking phase 2 scaffold —
+the service layer can accept the error and surface a meaningful
+"DDR LISTER signature mismatch on this server" message until then.
 
 ---
 

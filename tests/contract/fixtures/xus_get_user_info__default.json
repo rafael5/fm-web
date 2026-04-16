@@ -2,6 +2,6 @@
   "rpc_name": "XUS GET USER INFO",
   "variant": "default",
   "params": [],
-  "raw_response": "\u0016User not fully sign-on\u00000\r\nunk\r\nunk\r\nunk\r\nunk\r\nunk\r\nunk\r\n",
-  "recorded_at": "2026-04-15T23:39:06.900064+00:00"
+  "raw_response": "1497\r\nFAKEDOC,ONE\r\nOne Fakedoc\r\n500^CAMP MASTER^500\r\nCOMPUTER SPECIALIST\r\n\r\n1\r\n30\r\n\r\nV\r\nAVCODES\r\n2\r\n\r\n1\r\n1\r\n",
+  "recorded_at": "2026-04-16T00:59:55.096682+00:00"
 }
